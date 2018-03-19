@@ -1,21 +1,24 @@
 package com.mapbox.services.android.navigation.testapp.activity.navigationui;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import com.bosch.calponia.REST;
@@ -27,6 +30,7 @@ import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -47,12 +51,12 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 import com.mapbox.services.android.telemetry.location.LostLocationEngine;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -79,14 +83,12 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   @BindView(R.id.mapView)
   MapView mapView;
-  @BindView(R.id.launchRouteBtn)
+  @BindView(R.id.launch_route_btn)
   Button launchRouteBtn;
   @BindView(R.id.loading)
   ProgressBar loading;
-  @BindView(R.id.demoSwitch)
-  Switch demoSwitch;
-  @BindView(R.id.languageSpinner)
-  Spinner spinner;
+  @BindView(R.id.launch_btn_frame)
+  FrameLayout launchBtnFrame;
 
   private Marker currentMarker;
   private Point currentLocation;
@@ -94,10 +96,6 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   private DirectionsRoute route;
 
   private boolean locationFound;
-  private boolean shouldSimulateRoute;
-  private final List<Locale> locales = new ArrayList<>(
-    Arrays.asList(Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN));
-  private Locale locale;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -106,29 +104,28 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     ButterKnife.bind(this);
     mapView.onCreate(savedInstanceState);
     mapView.getMapAsync(this);
-    demoSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override
-      public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-        shouldSimulateRoute = checked;
-      }
-    });
-    ArrayAdapter adapter = ArrayAdapter.createFromResource(this,
-      R.array.languages_array, android.R.layout.simple_spinner_dropdown_item);
-    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    spinner.setAdapter(adapter);
+  }
 
-    spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-      @Override
-      public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-        locale = locales.get(position);
-      }
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    // Inflate the menu; this adds items to the action bar if it is present.
+    getMenuInflater().inflate(R.menu.navigation_view_activity_menu, menu);
+    return true;
+  }
 
-      @Override
-      public void onNothingSelected(AdapterView<?> adapterView) {
-      }
-    });
-    locale = LocaleUtils.getDeviceLocale(this);
-    spinner.setSelection(locales.indexOf(locale));
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case R.id.settings:
+        showSettings();
+        return true;
+      default:
+        return super.onOptionsItemSelected(item);
+    }
+  }
+
+  private void showSettings() {
+    startActivity(new Intent(this, NavigationViewSettingsActivity.class));
   }
 
   @SuppressWarnings( {"MissingPermission"})
@@ -194,7 +191,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
     mapView.onSaveInstanceState(outState);
   }
 
-  @OnClick(R.id.launchRouteBtn)
+  @OnClick(R.id.launch_route_btn)
   public void onRouteLaunchClick() {
     launchNavigationWithRoute();
   }
@@ -281,26 +278,54 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void initMapRoute() {
-    mapRoute = new NavigationMapRoute(mapView, mapboxMap, "admin-3-4-boundaries-bg");
+    mapRoute = new NavigationMapRoute(mapView, mapboxMap);
     mapRoute.setOnRouteSelectionChangeListener(this);
   }
 
   private void fetchRoute() {
-    NavigationRoute.builder()
+    NavigationRoute.Builder builder = NavigationRoute.builder()
       .accessToken(Mapbox.getAccessToken())
-      .language(locale)
       .origin(currentLocation)
       .destination(destination)
-      .alternatives(true)
-      .build()
+      .alternatives(true);
+    setFieldsFromSharedPreferences(builder);
+    builder.build()
       .getRoute(this);
     loading.setVisibility(View.VISIBLE);
   }
 
+  private void setFieldsFromSharedPreferences(NavigationRoute.Builder builder) {
+    builder
+      .language(getLocale())
+      .voiceUnits(NavigationUnitType.getDirectionsCriteriaUnitType(getUnitType()));
+  }
+
+  private Locale getLocale() {
+    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    return new Locale(sharedPreferences.getString("language", ""));
+  }
+
+  private int getUnitType() {
+    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    return Integer.parseInt(sharedPreferences.getString("unit_type", "0"));
+  }
+
+  private boolean getShouldSimulateRoute() {
+    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    return sharedPreferences.getBoolean("simulate_route", false);
+  }
+
   private void launchNavigationWithRoute() {
+    Locale locale = getLocale();
+    MapboxNavigationOptions navigationOptions =
+      MapboxNavigationOptions.builder()
+        .locale(locale)
+        .unitType(getUnitType())
+        .build();
+
     NavigationViewOptions.Builder optionsBuilder = NavigationViewOptions.builder()
-      .shouldSimulateRoute(shouldSimulateRoute)
-      .navigationOptions(MapboxNavigationOptions.builder().locale(locale).build());
+      .shouldSimulateRoute(getShouldSimulateRoute())
+      .navigationOptions(navigationOptions);
     if (route != null) {
       if (route.routeOptions().language().equals(locale.getLanguage())) {
         optionsBuilder.directionsRoute(route);
@@ -344,7 +369,9 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
       if (bboxPoints.size() > 1) {
         try {
           LatLngBounds bounds = new LatLngBounds.Builder().includes(bboxPoints).build();
-          animateCameraBbox(bounds, CAMERA_ANIMATION_DURATION, new int[] {50, 500, 50, 335});
+          // left, top, right, bottom
+          int topPadding = launchBtnFrame.getHeight() * 2;
+          animateCameraBbox(bounds, CAMERA_ANIMATION_DURATION, new int[] {50, topPadding, 50, 100});
         } catch (InvalidLatLngBoundsException exception) {
           Toast.makeText(this, "Valid route not found.", Toast.LENGTH_SHORT).show();
         }
@@ -353,8 +380,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
   }
 
   private void animateCameraBbox(LatLngBounds bounds, int animationTime, int[] padding) {
-    mapboxMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,
-      padding[0], padding[1], padding[2], padding[3]), animationTime);
+    CameraPosition position = mapboxMap.getCameraForLatLngBounds(bounds, padding);
+    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(position), animationTime);
   }
 
   private void animateCamera(LatLng point) {
@@ -371,10 +398,5 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
         currentMarker.setPosition(position);
       }
     }
-  }
-
-  @Override
-  public void onProgressChange(Location location, RouteProgress routeProgress) {
-    Log.i("HEEEEEEE", location.toString());
   }
 }

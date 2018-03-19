@@ -2,6 +2,39 @@
 
 Mapbox welcomes participation and contributions from everyone.
 
+### v0.11.1 - March 16, 2018
+
+* Adjust sound layout margin [#775](https://github.com/mapbox/mapbox-navigation-android/pull/775)
+* Fix distancesFromManeuver not being cleared [#773](https://github.com/mapbox/mapbox-navigation-android/pull/773)
+* Allow setting of custom destination marker in theme [#763](https://github.com/mapbox/mapbox-navigation-android/pull/763)
+* Fixed back button in NavigationViewActivity [#768](https://github.com/mapbox/mapbox-navigation-android/pull/768)
+* Fixed unit type bug [#769](https://github.com/mapbox/mapbox-navigation-android/pull/769)
+* Fix MapRoute listener not firing for index 0 [#772](https://github.com/mapbox/mapbox-navigation-android/pull//772)
+* Stop scroll of InstructionList before hiding [#766](https://github.com/mapbox/mapbox-navigation-android/pull/766)
+* Add baseUrl to NavigationRoute and Turf conversion [#767](https://github.com/mapbox/mapbox-navigation-android/pull/767)
+* Force first location update without last location [#756](https://github.com/mapbox/mapbox-navigation-android/pull/756)
+* Update EventListener Thread Safe [#762](https://github.com/mapbox/mapbox-navigation-android/pull/762)
+* Create camera animation from time between updates [#753](https://github.com/mapbox/mapbox-navigation-android/pull/753)
+* NavigationView Landscape Optimizations [#749](https://github.com/mapbox/mapbox-navigation-android/pull/749)
+
+### v0.11.0 - March 7, 2018
+
+* Fix same point being added twice for LatLngBounds [#741](https://github.com/mapbox/mapbox-navigation-android/pull/741)
+* Fix Recent Distances from maneuver Off-Route [#739](https://github.com/mapbox/mapbox-navigation-android/pull/739)
+* Update MAS Dependencies [#738](https://github.com/mapbox/mapbox-navigation-android/pull/738)
+* Update LocationLayerPlugin to 0.4.0 [#734](https://github.com/mapbox/mapbox-navigation-android/pull/734)
+* Fix visibility bug with TurnLanes [#733](https://github.com/mapbox/mapbox-navigation-android/pull/733)
+* Update Maps SDK 5.5.0 [#732](https://github.com/mapbox/mapbox-navigation-android/pull/732)
+* Show first BannerInstruction immediately [#731](https://github.com/mapbox/mapbox-navigation-android/pull/731)
+* Fix initialization of directions list [#728](https://github.com/mapbox/mapbox-navigation-android/pull/728)
+* Default Dynamic Camera for Navigation UI [#679](https://github.com/mapbox/mapbox-navigation-android/pull/679)
+
+### v0.10.0 - February 26, 2018
+
+* Fix NPE with MapRoute click listener [#721](https://github.com/mapbox/mapbox-navigation-android/pull/721)
+* Null check camera tracking [#719](https://github.com/mapbox/mapbox-navigation-android/pull/719)
+* Initialize metric session state in constructor [#718](https://github.com/mapbox/mapbox-navigation-android/pull/718)
+
 ### v0.10.0-beta.1 - February 16, 2018
 
 * Clear features so DirectionsRoute isn't redrawn when new style loads [#706](https://github.com/mapbox/mapbox-navigation-android/pull/706)

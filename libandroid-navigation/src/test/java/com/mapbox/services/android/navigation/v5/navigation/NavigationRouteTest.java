@@ -50,8 +50,8 @@ public class NavigationRouteTest extends BaseTest {
       .destination(Point.fromLngLat(1.0, 5.0))
       .build();
 
-    assertThat(navigationRoute.getCall().request().url().toString(),
-      containsString("bearings=90,90;2,3;"));
+    String requestUrl = navigationRoute.getCall().request().url().toString();
+    assertThat(requestUrl, containsString("bearings=90%2C90%3B2%2C3%3B"));
   }
 
   @Test
@@ -75,6 +75,7 @@ public class NavigationRouteTest extends BaseTest {
 
     RouteOptions routeOptions = RouteOptions.builder()
       .accessToken(ACCESS_TOKEN)
+      .baseUrl("https://api-directions-traf.com")
       .requestUuid("XYZ_UUID")
       .alternatives(true)
       .language(Locale.US.getLanguage())
@@ -91,6 +92,7 @@ public class NavigationRouteTest extends BaseTest {
       .build();
 
     String request = navigationRoute.getCall().request().url().toString();
+    assertThat(request, containsString("https://api-directions-traf.com"));
     assertThat(request, containsString("alternatives=true"));
     assertThat(request, containsString(ACCESS_TOKEN));
     assertThat(request, containsString("voice_units=metric"));
