@@ -76,7 +76,7 @@ public class NavigationLauncher {
    * @param context to retrieve {@link SharedPreferences}
    * @return {@link DirectionsRoute} stored when launching
    */
-  static DirectionsRoute extractRoute(Context context) {
+  public static DirectionsRoute extractRoute(Context context) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
     String directionsRouteJson = preferences.getString(NavigationConstants.NAVIGATION_VIEW_ROUTE_KEY, "");
     return DirectionsRoute.fromJson(directionsRouteJson);
@@ -92,7 +92,7 @@ public class NavigationLauncher {
    * @param context to retrieve {@link SharedPreferences}
    * @return map with both origin and destination coordinates
    */
-  static HashMap<String, Point> extractCoordinates(Context context) {
+  public static HashMap<String, Point> extractCoordinates(Context context) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
     double originLng = Double.longBitsToDouble(preferences
       .getLong(NavigationConstants.NAVIGATION_VIEW_ORIGIN_LNG_KEY, 0));

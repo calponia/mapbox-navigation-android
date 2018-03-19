@@ -1,0 +1,62 @@
+package com.bosch.calponia;
+
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+
+import com.google.zxing.Result;
+import com.mapbox.services.android.navigation.testapp.R;
+
+import org.json.JSONObject;
+
+import me.dm7.barcodescanner.zxing.ZXingScannerView;
+
+public class ScannerActivity extends Activity implements ZXingScannerView.ResultHandler {
+    private ZXingScannerView mScannerView;
+
+    private static String TAG = "ScannerActivity";
+
+    @Override
+    public void onCreate(Bundle state) {
+        super.onCreate(state);
+        mScannerView = new ZXingScannerView(this);   // Programmatically initialize the scanner view
+        setContentView(mScannerView);                // Set the scanner view as the content view
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mScannerView.setResultHandler(this); // Register ourselves as a handler for scan results.
+        mScannerView.startCamera();          // Start camera on resume
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mScannerView.stopCamera();           // Stop camera on pause
+    }
+
+    @Override
+    public void handleResult(Result rawResult) {
+        // Do something with the result here
+        Log.v(TAG, rawResult.getText()); // Prints scan results
+        Log.v(TAG, rawResult.getBarcodeFormat().toString()); // Prints the scan format (qrcode, pdf417 etc.)
+
+        try {
+            JSONObject data = new JSONObject(rawResult.getText());
+            if (data.getString("type").equals("vehicle")) {
+                REST.setVehicle(data.getString("id"));
+            } else
+            if (data.getString("type").equals("equipment")) {
+                REST.setEquipment(data.getString("id"));
+            }
+        } catch (Exception e) {
+            // wrong barcode!
+        }
+        startActivity(new Intent(this, com.mapbox.services.android.navigation.testapp.activity.navigationui.NavigationViewActivity.class));
+        // If you would like to resume scanning, call this method below:
+//        mScannerView.resumeCameraPreview(this);
+    }
+}

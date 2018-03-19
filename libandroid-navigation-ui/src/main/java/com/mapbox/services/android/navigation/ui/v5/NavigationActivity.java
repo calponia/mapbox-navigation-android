@@ -102,11 +102,11 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     // Intentionally empty
   }
 
-  private void extractRoute(NavigationViewOptions.Builder options) {
+  public void extractRoute(NavigationViewOptions.Builder options) {
     options.directionsRoute(NavigationLauncher.extractRoute(this));
   }
 
-  private void extractCoordinates(NavigationViewOptions.Builder options) {
+  public void extractCoordinates(NavigationViewOptions.Builder options) {
     HashMap<String, Point> coordinates = NavigationLauncher.extractCoordinates(this);
     if (coordinates.size() > 0) {
       options.origin(coordinates.get(NavigationConstants.NAVIGATION_VIEW_ORIGIN));

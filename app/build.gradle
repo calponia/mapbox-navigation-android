@@ -58,6 +58,9 @@ dependencies {
   implementation dependenciesList.butterKnife
   annotationProcessor dependenciesList.butterKnifeProcessor
 
+  // barcode scanner
+  compile 'me.dm7.barcodescanner:zxing:1.9.8'
+
   // Leak Canary
   debugImplementation dependenciesList.leakCanaryDebug
   releaseImplementation dependenciesList.leakCanaryRelease

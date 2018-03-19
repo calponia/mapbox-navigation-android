@@ -1,6 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.mapbox.services.android.navigation.testapp">
+    package="com.mapbox.services.android.navigation.testapp">
+
+    <uses-sdk
+        android:minSdkVersion="19"
+        android:targetSdkVersion="27" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature
+        android:name="android.hardware.sensor.accelerometer"
+        android:required="false" />
+    <uses-feature android:name="android.hardware.location" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+    <uses-feature android:name="android.hardware.wifi" />
 
     <application
         android:name=".NavigationApplication"
@@ -11,7 +31,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".MainActivity">
+        <activity
+            android:theme="@style/LoginTheme"
+            android:name="com.bosch.calponia.LoginActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateUnchanged|adjustResize"
+            android:fitsSystemWindows="true"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -19,51 +45,22 @@
         </activity>
 
         <activity
-            android:name=".activity.MockNavigationActivity"
-            android:label="@string/title_mock_navigation">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.RerouteActivity"
-            android:label="@string/title_reroute">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-        <activity
-            android:name=".activity.navigationui.NavigationMapRouteActivity"
-            android:label="@string/title_navigation_route_ui">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
-
-      <activity
-            android:name=".activity.navigationui.NavigationViewActivity"
+            android:theme="@style/ScannerTheme"
+            android:name="com.bosch.calponia.ScannerActivity"
             android:label="@string/title_navigation_view_ui">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value="com.bosch.calponia.LoginActivity"/>
         </activity>
 
         <activity
-            android:name=".activity.WaypointNavigationActivity"
-            android:label="@string/title_waypoint_navigation">
+            android:name=".activity.navigationui.NavigationViewActivity"
+            android:label="@string/title_scanner_view_ui">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value="com.bosch.calponia.ScannerActivity"/>
         </activity>
 
-        <activity
-            android:name=".EmbeddedNavigationActivity"
-            android:label="@string/title_embedded_navigation">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
-        </activity>
+        <activity android:name=".NavigationActivity"/>
     </application>
 </manifest>

@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -17,6 +18,8 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.bosch.calponia.REST;
+import com.bosch.calponia.Request;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.LineString;
@@ -34,13 +37,15 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.services.Constants;
+import com.mapbox.services.android.navigation.testapp.NavigationLauncher;
 import com.mapbox.services.android.navigation.testapp.R;
-import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 import com.mapbox.services.android.telemetry.location.LocationEngineListener;
@@ -63,7 +68,7 @@ import static com.mapbox.services.android.telemetry.location.LocationEnginePrior
 
 public class NavigationViewActivity extends AppCompatActivity implements OnMapReadyCallback,
   MapboxMap.OnMapLongClickListener, LocationEngineListener, Callback<DirectionsResponse>,
-  OnRouteSelectionChangeListener {
+  OnRouteSelectionChangeListener, ProgressChangeListener {
 
   private static final int CAMERA_ANIMATION_DURATION = 1000;
 
@@ -222,6 +227,8 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
 
   @Override
   public void onLocationChanged(Location location) {
+    // push data
+    REST.Vehicle(location);
     currentLocation = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     onLocationFound(location);
   }
@@ -302,6 +309,7 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
           .origin(currentLocation)
           .destination(destination);
       }
+      optionsBuilder.progressChangeListener(this);
       NavigationLauncher.startNavigation(this, optionsBuilder.build());
     }
   }
@@ -363,5 +371,10 @@ public class NavigationViewActivity extends AppCompatActivity implements OnMapRe
         currentMarker.setPosition(position);
       }
     }
+  }
+
+  @Override
+  public void onProgressChange(Location location, RouteProgress routeProgress) {
+    Log.i("HEEEEEEE", location.toString());
   }
 }

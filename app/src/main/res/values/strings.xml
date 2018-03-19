@@ -20,6 +20,9 @@
     <string name="title_embedded_navigation">Embedded Navigation</string>
     <string name="description_embedded_navigation">Navigation in a view which contains other views</string>
 
+    <string name="title_scanner_view_ui">Scan QR-Code</string>
+    <string name="description_scanner_view_ui">Scan an equipment or vehicle QR-Code</string>
+
     <string-array name="languages_array">
         <item>English</item>
         <item>French</item>
